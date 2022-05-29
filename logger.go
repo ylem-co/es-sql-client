@@ -1,4 +1,4 @@
-package main
+package essqlclient
 
 type Logger interface {
 	Info(...interface{})

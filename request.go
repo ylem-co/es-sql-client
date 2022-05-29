@@ -1,4 +1,4 @@
-package main
+package essqlclient
 
 type sqlQuery struct {
 	Query    string `json:"query"`
