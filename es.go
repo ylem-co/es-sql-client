@@ -3,6 +3,7 @@ package essqlclient
 import (
 	"context"
 	"fmt"
+	"github.com/datamin-io/es-sql-client/errors"
 	"github.com/go-resty/resty/v2"
 	"net/http"
 	"strconv"
@@ -34,13 +35,27 @@ func (e *ES) Version(v *uint8) (uint8, error) {
 	}
 
 	var clusterVersion version
-	r, err := e.client.R().SetResult(&clusterVersion).Get("/")
+	res, err := e.client.R().SetResult(&clusterVersion).Get("/")
 	if err != nil {
 		return 0, fmt.Errorf("es: version http: %s", err.Error())
 	}
 
-	if r.StatusCode() != http.StatusOK {
-		return 0, fmt.Errorf("es: version http: %s", r.Status())
+	if res.StatusCode() == http.StatusBadRequest {
+		return 0, &errors.BadRequest{
+			Operation: errors.ErrorOperationVersion,
+			Message: string(res.Body()),
+		}
+	}
+
+	if res.StatusCode() == http.StatusForbidden {
+		return 0, &errors.Forbidden{
+			Operation: errors.ErrorOperationVersion,
+			Message: string(res.Body()),
+		}
+	}
+
+	if res.StatusCode() != http.StatusOK {
+		return 0, fmt.Errorf("es: version http: %s", res.Status())
 	}
 
 	n := clusterVersion.Version.Number
@@ -102,6 +117,20 @@ func (e *ES) SqlQuery(query string) (*SqlResponse, error) {
 	res, err := e.client.R().SetBody(q).Post(path)
 	if err != nil {
 		return nil, fmt.Errorf("es: sql query: %s", err.Error())
+	}
+
+	if res.StatusCode() == http.StatusBadRequest {
+		return nil, &errors.BadRequest{
+			Operation: errors.ErrorOperationSqlQuery,
+			Message: string(res.Body()),
+		}
+	}
+
+	if res.StatusCode() == http.StatusForbidden {
+		return nil, &errors.Forbidden{
+			Operation: errors.ErrorOperationSqlQuery,
+			Message: string(res.Body()),
+		}
 	}
 
 	if res.StatusCode() != http.StatusOK {
