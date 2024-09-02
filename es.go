@@ -3,7 +3,7 @@ package essqlclient
 import (
 	"context"
 	"fmt"
-	"github.com/datamin-io/es-sql-client/errors"
+	"github.com/ylem-co/es-sql-client/errors"
 	"github.com/go-resty/resty/v2"
 	"net/http"
 	"strconv"

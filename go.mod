@@ -1,4 +1,4 @@
-module github.com/datamin-io/es-sql-client
+module github.com/ylem-co/es-sql-client
 
 go 1.21
 
